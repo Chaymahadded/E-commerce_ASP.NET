@@ -1,0 +1,115 @@
+﻿@using CodesByAniz.Tools;
+@using System.Security.Claims;
+@model IEnumerable<InventoryBeginners.Models.Product>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+    <!-- Include SweetAlert CDN for styles and scripts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                    <div class="card h-100">
+                        @{
+                            var imagePath = $"~/images/{item.PhotoUrl}";
+                            var imageUrl = Url.Content(imagePath);
+                        }
+                        <img src="@imageUrl" class="card-img-top" alt="@item.Description" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color:black;">@item.Name</h5>
+                            <p class="card-text" style="color:black;">@item.Description</p>
+                            <p class="card-text" style="color:black;">@item.Price DT</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-center">
+                            <!-- Added d-flex and justify-content-center -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="btn-group">
+                                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@item.Code">
+                                        <span class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Code">
+                                        <span class="btn btn-sm btn-outline-dark">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+
+                                    <a asp-controller="Product" asp-action="Delete" asp-route-id="@item.Code">
+                                        <span class="btn btn-sm btn-outline-danger">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <form id="addToCartForm-@item.Code" asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                    <input type="hidden" name="productCode" value="@item.Code" />
+                                    <input type="hidden" name="productName" value="@item.Name" />
+                                    <input type="hidden" name="price" value="@item.Price" />
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 70px;" />
+                                        <button type="button" class="btn" style="background-color:#DFBA4E;color:black;" onclick="showNotification('addToCartForm-@item.Code')">
+                                            Add To Cart
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-plus-fill" viewBox="0 0 16 16">
+                                                <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0M9 5.5V7h1.5a.5.5 0 0 1 0 1H9v1.5a.5.5 0 0 1-1 0V8H6.5a.5.5 0 0 1 0-1H8V5.5a.5.5 0 0 1 1 0" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <script>
+        function showNotification(formId) {
+            // Vérifier si l'utilisateur est authentifié
+            if (@User.Identity.IsAuthenticated.ToString().ToLower()) {
+                // Empêcher la soumission automatique du formulaire
+                event.preventDefault();
+
+                // Utiliser SweetAlert pour une boîte de dialogue modale stylisée
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Product added to cart!',
+                    showConfirmButton: false, // Masquer le bouton "OK"
+                    timer: 1500 // Fermer la notification après 2 secondes
+                });
+
+                // Soumettre le formulaire après l'affichage de l'alerte
+                setTimeout(() => {
+                    document.getElementById(formId).submit();
+                }, 1500);
+            } else {
+                // Afficher un message d'erreur avec redirection vers la page de connexion
+                Swal.fire({
+                    icon: 'error',
+                    title: 'You must be logged in to add items to the cart',
+                    showConfirmButton: false, // Masquer le bouton "OK"
+                    timer: 1500 // Fermer la notification après 2 secondes
+                });
+
+                // Rediriger vers la page de connexion après l'affichage de l'alerte
+                setTimeout(() => {
+                    window.location.href = '/Identity/Account/Login'; // Remplacez '/Identity/Account/Login' par le chemin réel de votre page de connexion
+                }, 1500);
+            }
+        }
+    </script>
+
+
+</body>
+</html>

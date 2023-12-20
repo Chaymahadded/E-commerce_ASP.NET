@@ -1,0 +1,54 @@
+﻿@model List<InventoryBeginners.Models.ShoppingCart>
+@using Microsoft.AspNetCore.Identity
+@using InventoryBeginners.Models
+
+<h2>Order List</h2>
+@{
+
+    PagerModel pager = ViewBag.Pager;
+
+
+
+}
+@if (Model != null && Model.Any())
+{
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User Id</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Etat</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cart in Model)
+            {
+                <tr>
+                    <td>
+                        @cart.UserId
+                    </td>
+                    <td>
+                        @cart.Total
+                    </td>
+                    <td>
+                        @cart.Date
+                    </td>
+                    <td>
+                        @cart.Etat
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+else
+{
+    <p>Order List is empty </p>
+    <a asp-action="Index" asp-controller="Home">Home Page</a>
+}
+
+
